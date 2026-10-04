@@ -30,7 +30,6 @@ def init_telemetry(service_name: str) -> None:
 
 
 init_telemetry("weather-mcp-server")
-HTTPXClientInstrumentor().instrument()
 tracer = trace.get_tracer("weather-mcp-server")
 
 GRAPHQL_URL = os.getenv("GRAPHQL_URL", "http://localhost:8002/graphql")
