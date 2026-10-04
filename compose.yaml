@@ -1,0 +1,49 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"
+      - "4318:4318"
+
+  weather-rest:
+    build:
+      context: ./services/weather-rest
+    container_name: weather-rest
+    environment:
+      - OTEL_SERVICE_NAME=weather-rest-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+    ports:
+      - "8003:8000"
+    depends_on:
+      - jaeger
+
+  graphql-service:
+    build:
+      context: ./services/graphql-service
+    container_name: graphql-service
+    environment:
+      - WEATHER_REST_URL=http://weather-rest:8000
+      - OTEL_SERVICE_NAME=weather-graphql-service
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+    ports:
+      - "8002:8000"
+    depends_on:
+      - weather-rest
+      - jaeger
+
+  mcp-server:
+    build:
+      context: ./services/mcp-server
+    container_name: mcp-server
+    environment:
+      - GRAPHQL_URL=http://graphql-service:8000/graphql
+      - OTEL_SERVICE_NAME=weather-mcp-server
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+    ports:
+      - "8000:8000"
+    depends_on:
+      - graphql-service
+      - jaeger
