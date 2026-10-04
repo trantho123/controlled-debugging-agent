@@ -31,7 +31,6 @@ def init_telemetry(service_name: str) -> None:
 
 
 init_telemetry("weather-graphql-service")
-HTTPXClientInstrumentor().instrument()
 
 WEATHER_REST_URL = os.getenv("WEATHER_REST_URL", "http://localhost:8003")
 
